@@ -19,9 +19,9 @@ const changeMode = (function(){
             boxNewTodo.forEach(el => {
                 el.style.borderBottom = '1px solid var(--DarkGrayishBlue)'
             });
-            todoContent.classList.add('dark')
-            footer.classList.add('dark')
-            btnFilter.classList.add('dark')
+            todoContent.classList.add('dark');
+            footer.classList.add('dark');
+            btnFilter.classList.add('dark');
             btnMode.id = 'darkMode';
 
         } else if(btnMode.id === 'darkMode'){
@@ -35,9 +35,10 @@ const changeMode = (function(){
             boxNewTodo.forEach(el => {
                 el.style = ''
             });
-            todoContent.classList.remove('dark')
-            footer.classList.remove('dark')
-            btnFilter.classList.remove('dark')
+            body.classList.remove('dark');
+            todoContent.classList.remove('dark');
+            footer.classList.remove('dark');
+            btnFilter.classList.remove('dark');
 
             btnMode.id = 'lightMode';
         }

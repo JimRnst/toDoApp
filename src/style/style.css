@@ -147,7 +147,7 @@ body.dark #container{
     display: none;
 }
 
-.box-new-todo.blur .delete{
+.box-new-todo.hover .delete{
     display: block;
     cursor: pointer;
 }
