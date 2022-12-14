@@ -15,7 +15,7 @@ const loadHome = (function() {
       <div id="todo-content">
         <div class="todo-container" id="lista"></div>
         <div id="box-new-todo-footer">
-          <div id="items-count"><span id="counted-items">0</span> items</div>
+          <div id="items-count"><span id="counted-items">0</span> items left</div>
           <div id="btn-filter">
             <div id="all">All</div>
             <div id="active">Active</div>

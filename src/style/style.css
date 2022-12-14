@@ -170,6 +170,13 @@ body.dark #container{
     gap: 10px;
 }
 
+#btn-filter.statusAll #all,
+#btn-filter.statusActive #active,
+#btn-filter.statusCompleted #completed{
+    color: blue;
+}
+
+
 #all,
 #active,
 #completed,
@@ -209,14 +216,14 @@ body.dark #container{
     background: var(--VeryLightGray);
     border-radius: 5px;
 }
-
+/* 
 @media screen and (max-width: 1200px) {
 
     #box-todo{
         position: relative;
         top: -100px;
     }
-}
+} */
 
 @media screen and (max-width: 800px) {
 

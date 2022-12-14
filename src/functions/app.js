@@ -9,17 +9,10 @@
         const items = document.querySelector('#counted-items');
         const btnFilter = document.querySelector('#btn-filter');
         const btnClearComplete = document.querySelector('#clear-complete');
+        const checkboxCreateTodo = document.querySelector('#checkboxCreateTodo')
 
         let filterToDO = 'all';
         let toDoArr = [];
-
-        //constructor del todo
-        class ToDo {
-            constructor(name, status){
-                this.name = name;
-                this.status = status;
-            };
-        };
 
         //function drag and drop
         // const lista = document.getElementById('lista');
@@ -38,13 +31,18 @@
         form.addEventListener('submit', (e) => {
             e.preventDefault();
         if(inputValue.value === ''){
-                alert('Please create a new todo')
+            alert('Please create a new todo')
         } else{
-                const newTodo = new ToDo(inputValue.value, checkbox.checked);
-                toDoArr.push(newTodo);
-                countItems();
-                checkbox.checked ? showTodo(inputValue.value, true):showTodo(inputValue.value, false);
+            toDoArr.push({name: inputValue.value, status:checkbox.checked});
+            countItems();
+            if(filterToDO === 'all') {
+                checkbox.checked ? showTodo(inputValue.value, true): showTodo(inputValue.value, false);
+                btnFilter.classList.add('statusAll');
+            };
+            if(filterToDO === 'active' && checkbox.checked === false) showTodo(inputValue.value, checkbox.checked);
+            if(filterToDO === 'completed' && checkbox.checked === true) showTodo(inputValue.value, checkbox.checked);
         };
+            checkboxCreateTodo.checked = false;
             inputValue.value = '';
         });
 
@@ -56,31 +54,31 @@
                 if(e.target.checked){
                     const setId = e.target.parentElement;
                     const nameChecked = e.target.parentElement.children[1].children[0];
-                    const indexAllToDo = toDoArr.map(name => name.name).indexOf(nameChecked.innerText);
+                    const result = toDoArr.find(({ name }) => name === nameChecked.innerText);
+                    result.status = true;
                     nameChecked.style.color = 'var(--DarkGrayishBlue)';
                     nameChecked.style.textDecoration = 'line-through';
-                    toDoArr[indexAllToDo].status = true;
                     setId.classList.add('complete');
                     countItems();
 
                     //active todo
                 } else if(e.target.checked === false){
-                    const setId = e.target.parentElement;
+                    const setClass = e.target.parentElement;
                     const nameChecked = e.target.parentElement.children[1].children[0];
-                    const indexAllToDo = toDoArr.map(name => name.name).indexOf(nameChecked.innerText);
+                    const result = toDoArr.find(({ name }) => name === nameChecked.innerText);
+                    result.status = false;
                     nameChecked.style = '';
                     nameChecked.style = '';
-                    toDoArr[indexAllToDo].status = false;
-                    setId.classList.remove('complete');
+                    setClass.classList.remove('complete');
                     countItems();
                 };
 
                 //delete todo
                 if(e.target.className === 'delete'){
-                    const idk = e.target.parentElement;
-                    const indexAllToDo = toDoArr.map(name => name.name).indexOf(e.target.parentElement.children[1].innerText);
-                    toDoArr.splice(indexAllToDo, 1)
-                    idk.remove();
+                    const todoDOM = e.target.parentElement;
+                    const nameTodo = e.target.parentElement.children[1].innerText;
+                    toDoArr.splice(toDoArr.findIndex(todo => todo.name === nameTodo), 1);
+                    todoDOM.remove();
                     countItems();
                 };
             };
@@ -90,13 +88,19 @@
         btnFilter.addEventListener('click', (e) => {
             //se cambia el estado y se llama la function 
             if(e.target.id === 'all'){
-                filterToDO = 'all'
+                filterToDO = 'all';
+                btnFilter.classList.add('statusAll');
+                btnFilter.classList.remove('statusActive', 'statusCompleted');
             };
             if(e.target.id === 'active'){
-                filterToDO = 'active'
+                filterToDO = 'active';
+                btnFilter.classList.add('statusActive');
+                btnFilter.classList.remove('statusAll', 'statusCompleted');
             };
             if(e.target.id === 'completed'){
-                filterToDO = 'completed'
+                filterToDO = 'completed';
+                btnFilter.classList.add('statusCompleted');
+                btnFilter.classList.remove('statusAll', 'statusActive');
             };
 
             //call the function
@@ -105,25 +109,17 @@
 
         //button clear todos competed
         btnClearComplete.addEventListener('click', () => {
-            //por cada todo completado mapeo el array para buscar el index y eliminarlo
-            const delteComplete = document.querySelectorAll('.complete');
-            delteComplete.forEach(todo => {
-                toDoArr.map(name => {
-                    if(name.status === true){
-                        const index = toDoArr.map(idk => idk.name).indexOf(todo.children[1].innerText);
-                        toDoArr.splice(index, 1);
-                        console.log(name.name);
-                    }
-                });
-                //eliminar todo de DOM
-                todo.remove();
-            });
+            const deleteCompleteArr = toDoArr.filter(({status}) => status === true);
+            const deleteCompleteDOM = document.querySelectorAll('.complete');
+            deleteCompleteArr.forEach(todo => toDoArr.splice(toDoArr.findIndex(e => e.status === true), 1));
+            deleteCompleteDOM.forEach(todo => todo.remove());
             countItems();
         });
 
         //contar items en el array
         function countItems(){
-            items.innerText = toDoArr.length;
+            const todoFilterActive = toDoArr.filter(({status}) => status === false);
+            items.innerText = todoFilterActive.length;
         };
 
         //mostar todo creado en el DOM
@@ -131,6 +127,7 @@
             const div = document.createElement('div');
             div.classList.add('box-new-todo');
             for (let i = 0; i < toDoArr.length; i++) {
+                div.setAttribute('data-id', i)
                 if(status === true){
                     div.classList.add('complete')
                     div.innerHTML = `
@@ -140,7 +137,7 @@
                     `;
                 } else if(status === false){
                     div.innerHTML = `
-                    <input type="checkbox" class="check">
+                    <input type="checkbox" class="check"  data-id="${i}">
                     <div class="todo-name"><span class="todo-name-hover">${info}</span></div>
                     <img class="delete" src="/assets/images/icon-cross.svg" alt="delete">
                     `;
@@ -167,31 +164,20 @@
         //mostar todos filtrados
         function showFilterToDO(){
             if(filterToDO === 'all'){
-                todocontainer.innerHTML = ''
-                toDoArr.map(name => {
-                    if(name.status === true){
-                        showTodo(name.name, true);
-                    } else if(name.status === false){
-                        showTodo(name.name, false);
-                    };
-                });
+                const todoAll = toDoArr.filter(todo => todo);
+                todocontainer.innerHTML = '';
+                todoAll.forEach(todo => todo.status ? showTodo(todo.name, todo.status) : showTodo(todo.name, todo.status));
 
             }
             if(filterToDO === 'active'){
-                todocontainer.innerHTML = ''
-                toDoArr.map(name => {
-                    if(name.status === false){
-                        showTodo(name.name, false);
-                    };
-                });
+                todocontainer.innerHTML = '';
+                const todoActive = toDoArr.filter(({status}) => status === false);
+                todoActive.forEach(todo => showTodo(todo.name, todo.status));
             }
             if(filterToDO === 'completed'){
-                todocontainer.innerHTML = ''
-                toDoArr.map(name => {
-                    if(name.status === true){
-                        showTodo(name.name, true);
-                    };
-                });
+                todocontainer.innerHTML = '';
+                const todoCompleted = toDoArr.filter(({status}) => status === true);
+                todoCompleted.forEach(todo => showTodo(todo.name, todo.status))
             };
         };
     });
